@@ -2,7 +2,8 @@
 #define MAIN_H
 
 #include <stdarg.h>
-#include <unistd.h>
+#include "buffer.h"
+#include "handlers.h"
 
 int _printf(const char *format, ...);
 
