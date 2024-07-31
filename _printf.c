@@ -12,7 +12,7 @@ int _printf(const char *format, ...)
     char buffer[BUFFER_SIZE];
     va_list args;
     const char *p;
-    int flags;
+    int flags, length_modifier;
 
     if (!format)
         return (-1);
@@ -25,6 +25,7 @@ int _printf(const char *format, ...)
         {
             p++;
             flags = handle_flags(&p);
+            length_modifier = handle_length_modifier(&p);
 
             switch (*p)
             {
@@ -78,8 +79,15 @@ int _printf(const char *format, ...)
                 case 'd':
                 case 'i':
                 {
-                    int num = va_arg(args, int);
-                    char *str = convert_to_string(num, 10, 0);
+                    long num;
+                    char *str;
+                    if (length_modifier == 1)
+                        num = va_arg(args, long);
+                    else if (length_modifier == 2)
+                        num = (short)va_arg(args, int);
+                    else
+                        num = va_arg(args, int);
+                    str = convert_to_string(num, 10, 0);
 
                     if (flags & 1) { /* '+' flag */
                         if (num >= 0)
@@ -97,8 +105,15 @@ int _printf(const char *format, ...)
                 }
                 case 'u':
                 {
-                    unsigned int num = va_arg(args, unsigned int);
-                    char *str = convert_to_string(num, 10, 0);
+                    unsigned long num;
+                    char *str;
+                    if (length_modifier == 1)
+                        num = va_arg(args, unsigned long);
+                    else if (length_modifier == 2)
+                        num = (unsigned short)va_arg(args, unsigned int);
+                    else
+                        num = va_arg(args, unsigned int);
+                    str = convert_to_string(num, 10, 0);
                     if (!str)
                         return (-1);
                     while (*str)
@@ -107,8 +122,15 @@ int _printf(const char *format, ...)
                 }
                 case 'o':
                 {
-                    unsigned int num = va_arg(args, unsigned int);
-                    char *str = convert_to_string(num, 8, 0);
+                    unsigned long num;
+                    char *str;
+                    if (length_modifier == 1)
+                        num = va_arg(args, unsigned long);
+                    else if (length_modifier == 2)
+                        num = (unsigned short)va_arg(args, unsigned int);
+                    else
+                        num = va_arg(args, unsigned int);
+                    str = convert_to_string(num, 8, 0);
 
                     if (flags & 4 && num != 0) { /* '#' flag for octal */
                         buffer[buffer_index++] = '0';
@@ -123,9 +145,16 @@ int _printf(const char *format, ...)
                 case 'x':
                 case 'X':
                 {
-                    unsigned int num = va_arg(args, unsigned int);
+                    unsigned long num;
+                    char *str;
                     int uppercase = (*p == 'X');
-                    char *str = convert_to_string(num, 16, uppercase);
+                    if (length_modifier == 1)
+                        num = va_arg(args, unsigned long);
+                    else if (length_modifier == 2)
+                        num = (unsigned short)va_arg(args, unsigned int);
+                    else
+                        num = va_arg(args, unsigned int);
+                    str = convert_to_string(num, 16, uppercase);
 
                     if (flags & 4 && num != 0) { /* '#' flag for hex */
                         buffer[buffer_index++] = '0';
@@ -168,14 +197,14 @@ int _printf(const char *format, ...)
 }
 
 /**
- * convert_to_string - Converts an unsigned integer to a string
- * @num: The unsigned integer to convert
+ * convert_to_string - Converts an unsigned long integer to a string
+ * @num: The unsigned long integer to convert
  * @base: The base to convert the integer to
  * @uppercase: Flag indicating if the conversion is for uppercase hex
  *
  * Return: A pointer to the converted string
  */
-char *convert_to_string(unsigned int num, int base, int uppercase)
+char *convert_to_string(unsigned long num, int base, int uppercase)
 {
     static char buffer[50];
     char *ptr = &buffer[49];
@@ -270,5 +299,29 @@ int handle_flags(const char **format)
     }
 
     return flags;
+}
+
+/**
+ * handle_length_modifier - Parses the format string for length modifiers
+ * @format: The format string
+ *
+ * Return: An integer representing the length modifier
+ */
+int handle_length_modifier(const char **format)
+{
+    int length_modifier = 0;
+
+    if (**format == 'l')
+    {
+        length_modifier = 1;
+        (*format)++;
+    }
+    else if (**format == 'h')
+    {
+        length_modifier = 2;
+        (*format)++;
+    }
+
+    return length_modifier;
 }
 
