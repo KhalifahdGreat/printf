@@ -46,7 +46,47 @@ int _printf(const char *format, ...)
                 case 'i':
                 {
                     int num = va_arg(args, int);
-                    char *str = convert_to_string(num, 10);
+                    char *str = convert_to_string(num, 10, 0);
+                    if (!str)
+                        return (-1);
+                    while (*str)
+                        count += write(1, str++, 1);
+                    break;
+                }
+                case 'u':
+                {
+                    unsigned int num = va_arg(args, unsigned int);
+                    char *str = convert_to_string(num, 10, 0);
+                    if (!str)
+                        return (-1);
+                    while (*str)
+                        count += write(1, str++, 1);
+                    break;
+                }
+                case 'o':
+                {
+                    unsigned int num = va_arg(args, unsigned int);
+                    char *str = convert_to_string(num, 8, 0);
+                    if (!str)
+                        return (-1);
+                    while (*str)
+                        count += write(1, str++, 1);
+                    break;
+                }
+                case 'x':
+                {
+                    unsigned int num = va_arg(args, unsigned int);
+                    char *str = convert_to_string(num, 16, 0);
+                    if (!str)
+                        return (-1);
+                    while (*str)
+                        count += write(1, str++, 1);
+                    break;
+                }
+                case 'X':
+                {
+                    unsigned int num = va_arg(args, unsigned int);
+                    char *str = convert_to_string(num, 16, 1);
                     if (!str)
                         return (-1);
                     while (*str)
@@ -70,17 +110,18 @@ int _printf(const char *format, ...)
 }
 
 /**
- * convert_to_string - Converts an integer to a string
- * @num: The integer to convert
+ * convert_to_string - Converts an unsigned integer to a string
+ * @num: The unsigned integer to convert
  * @base: The base to convert the integer to
+ * @uppercase: Flag indicating if the conversion is for uppercase hex
  *
  * Return: A pointer to the converted string
  */
-char *convert_to_string(int num, int base)
+char *convert_to_string(unsigned int num, int base, int uppercase)
 {
     static char buffer[50];
     char *ptr = &buffer[49];
-    int is_negative = 0;
+    char *digits = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
 
     *ptr = '\0';
 
@@ -90,21 +131,11 @@ char *convert_to_string(int num, int base)
         return (ptr);
     }
 
-    if (num < 0 && base == 10)
-    {
-        is_negative = 1;
-        num = -num;
-    }
-
     while (num != 0)
     {
-        int rem = num % base;
-        *--ptr = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
+        *--ptr = digits[num % base];
         num /= base;
     }
-
-    if (is_negative)
-        *--ptr = '-';
 
     return (ptr);
 }

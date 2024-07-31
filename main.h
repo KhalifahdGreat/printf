@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 int _printf(const char *format, ...);
-char *convert_to_string(int num, int base);
+char *convert_to_string(unsigned int num, int base, int uppercase);
 
 #endif /* MAIN_H */
 
