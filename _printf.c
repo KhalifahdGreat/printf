@@ -8,7 +8,8 @@
  */
 int _printf(const char *format, ...)
 {
-    int count = 0;
+    int count = 0, buffer_index = 0;
+    char buffer[BUFFER_SIZE];
     va_list args;
     const char *p;
 
@@ -27,7 +28,7 @@ int _printf(const char *format, ...)
                 case 'c':
                 {
                     char c = va_arg(args, int);
-                    count += write(1, &c, 1);
+                    buffer[buffer_index++] = c;
                     break;
                 }
                 case 's':
@@ -36,11 +37,11 @@ int _printf(const char *format, ...)
                     if (!str)
                         str = "(null)";
                     while (*str)
-                        count += write(1, str++, 1);
+                        buffer[buffer_index++] = *str++;
                     break;
                 }
                 case '%':
-                    count += write(1, "%", 1);
+                    buffer[buffer_index++] = '%';
                     break;
                 case 'd':
                 case 'i':
@@ -50,7 +51,7 @@ int _printf(const char *format, ...)
                     if (!str)
                         return (-1);
                     while (*str)
-                        count += write(1, str++, 1);
+                        buffer[buffer_index++] = *str++;
                     break;
                 }
                 case 'u':
@@ -60,7 +61,7 @@ int _printf(const char *format, ...)
                     if (!str)
                         return (-1);
                     while (*str)
-                        count += write(1, str++, 1);
+                        buffer[buffer_index++] = *str++;
                     break;
                 }
                 case 'o':
@@ -70,7 +71,7 @@ int _printf(const char *format, ...)
                     if (!str)
                         return (-1);
                     while (*str)
-                        count += write(1, str++, 1);
+                        buffer[buffer_index++] = *str++;
                     break;
                 }
                 case 'x':
@@ -80,7 +81,7 @@ int _printf(const char *format, ...)
                     if (!str)
                         return (-1);
                     while (*str)
-                        count += write(1, str++, 1);
+                        buffer[buffer_index++] = *str++;
                     break;
                 }
                 case 'X':
@@ -90,19 +91,32 @@ int _printf(const char *format, ...)
                     if (!str)
                         return (-1);
                     while (*str)
-                        count += write(1, str++, 1);
+                        buffer[buffer_index++] = *str++;
                     break;
                 }
                 default:
-                    count += write(1, "%", 1);
-                    count += write(1, p, 1);
+                    buffer[buffer_index++] = '%';
+                    buffer[buffer_index++] = *p;
                     break;
             }
         }
         else
         {
-            count += write(1, p, 1);
+            buffer[buffer_index++] = *p;
         }
+
+        if (buffer_index >= BUFFER_SIZE - 1)
+        {
+            write(1, buffer, buffer_index);
+            count += buffer_index;
+            buffer_index = 0;
+        }
+    }
+
+    if (buffer_index > 0)
+    {
+        write(1, buffer, buffer_index);
+        count += buffer_index;
     }
 
     va_end(args);
