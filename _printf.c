@@ -59,6 +59,16 @@ int _printf(const char *format, ...)
                     }
                     break;
                 }
+                case 'p':
+                {
+                    void *ptr = va_arg(args, void *);
+                    char *str = convert_pointer_to_string(ptr);
+                    if (!str)
+                        return (-1);
+                    while (*str)
+                        buffer[buffer_index++] = *str++;
+                    break;
+                }
                 case '%':
                     buffer[buffer_index++] = '%';
                     break;
@@ -186,5 +196,40 @@ void convert_non_printable(char c, char *buffer, int *index)
     buffer[(*index)++] = 'x';
     buffer[(*index)++] = hex_digits[(c >> 4) & 0xF];
     buffer[(*index)++] = hex_digits[c & 0xF];
+}
+
+/**
+ * convert_pointer_to_string - Converts a pointer to a string
+ * @ptr: The pointer to convert
+ *
+ * Return: A pointer to the converted string
+ */
+char *convert_pointer_to_string(void *ptr)
+{
+    static char buffer[50];
+    unsigned long addr = (unsigned long)ptr;
+    char *digits = "0123456789abcdef";
+    char *ptr_str = &buffer[49];
+
+    *ptr_str = '\0';
+
+    if (addr == 0)
+    {
+        *--ptr_str = '0';
+        *--ptr_str = 'x';
+        *--ptr_str = '0';
+        return (ptr_str);
+    }
+
+    while (addr != 0)
+    {
+        *--ptr_str = digits[addr % 16];
+        addr /= 16;
+    }
+
+    *--ptr_str = 'x';
+    *--ptr_str = '0';
+
+    return (ptr_str);
 }
 
