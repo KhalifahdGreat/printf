@@ -12,6 +12,7 @@ int main(void)
     _printf("Octal: %o\n", 12345);
     _printf("Hex (lowercase): %x\n", 12345);
     _printf("Hex (uppercase): %X\n", 12345);
+    _printf("Special String: %S\n", "Best\nSchool"); /* Should print "Best\x0ASchool" */
     _printf("Unknown: %r\n"); /* Should print "%r" */
 
     return (0);

@@ -40,6 +40,25 @@ int _printf(const char *format, ...)
                         buffer[buffer_index++] = *str++;
                     break;
                 }
+                case 'S':
+                {
+                    char *str = va_arg(args, char *);
+                    if (!str)
+                        str = "(null)";
+                    while (*str)
+                    {
+                        if ((*str > 0 && *str < 32) || *str >= 127)
+                        {
+                            convert_non_printable(*str, buffer, &buffer_index);
+                        }
+                        else
+                        {
+                            buffer[buffer_index++] = *str;
+                        }
+                        str++;
+                    }
+                    break;
+                }
                 case '%':
                     buffer[buffer_index++] = '%';
                     break;
@@ -152,5 +171,20 @@ char *convert_to_string(unsigned int num, int base, int uppercase)
     }
 
     return (ptr);
+}
+
+/**
+ * convert_non_printable - Converts non-printable characters to \xHH format
+ * @c: The non-printable character
+ * @buffer: The buffer to write the converted string
+ * @index: The current index in the buffer
+ */
+void convert_non_printable(char c, char *buffer, int *index)
+{
+    const char *hex_digits = "0123456789ABCDEF";
+    buffer[(*index)++] = '\\';
+    buffer[(*index)++] = 'x';
+    buffer[(*index)++] = hex_digits[(c >> 4) & 0xF];
+    buffer[(*index)++] = hex_digits[c & 0xF];
 }
 
