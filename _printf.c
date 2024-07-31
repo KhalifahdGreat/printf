@@ -12,6 +12,7 @@ int _printf(const char *format, ...)
     char buffer[BUFFER_SIZE];
     va_list args;
     const char *p;
+    int flags;
 
     if (!format)
         return (-1);
@@ -23,6 +24,8 @@ int _printf(const char *format, ...)
         if (*p == '%')
         {
             p++;
+            flags = handle_flags(&p);
+
             switch (*p)
             {
                 case 'c':
@@ -77,6 +80,15 @@ int _printf(const char *format, ...)
                 {
                     int num = va_arg(args, int);
                     char *str = convert_to_string(num, 10, 0);
+
+                    if (flags & 1) { /* '+' flag */
+                        if (num >= 0)
+                            buffer[buffer_index++] = '+';
+                    } else if (flags & 2) { /* ' ' flag */
+                        if (num >= 0)
+                            buffer[buffer_index++] = ' ';
+                    }
+
                     if (!str)
                         return (-1);
                     while (*str)
@@ -97,6 +109,11 @@ int _printf(const char *format, ...)
                 {
                     unsigned int num = va_arg(args, unsigned int);
                     char *str = convert_to_string(num, 8, 0);
+
+                    if (flags & 4 && num != 0) { /* '#' flag for octal */
+                        buffer[buffer_index++] = '0';
+                    }
+
                     if (!str)
                         return (-1);
                     while (*str)
@@ -104,19 +121,17 @@ int _printf(const char *format, ...)
                     break;
                 }
                 case 'x':
-                {
-                    unsigned int num = va_arg(args, unsigned int);
-                    char *str = convert_to_string(num, 16, 0);
-                    if (!str)
-                        return (-1);
-                    while (*str)
-                        buffer[buffer_index++] = *str++;
-                    break;
-                }
                 case 'X':
                 {
                     unsigned int num = va_arg(args, unsigned int);
-                    char *str = convert_to_string(num, 16, 1);
+                    int uppercase = (*p == 'X');
+                    char *str = convert_to_string(num, 16, uppercase);
+
+                    if (flags & 4 && num != 0) { /* '#' flag for hex */
+                        buffer[buffer_index++] = '0';
+                        buffer[buffer_index++] = (uppercase) ? 'X' : 'x';
+                    }
+
                     if (!str)
                         return (-1);
                     while (*str)
@@ -231,5 +246,29 @@ char *convert_pointer_to_string(void *ptr)
     *--ptr_str = '0';
 
     return (ptr_str);
+}
+
+/**
+ * handle_flags - Parses the format string for flag characters
+ * @format: The format string
+ *
+ * Return: An integer representing the flags
+ */
+int handle_flags(const char **format)
+{
+    int flags = 0;
+
+    while (**format == '+' || **format == ' ' || **format == '#')
+    {
+        if (**format == '+')
+            flags |= 1;
+        else if (**format == ' ')
+            flags |= 2;
+        else if (**format == '#')
+            flags |= 4;
+        (*format)++;
+    }
+
+    return flags;
 }
 

@@ -17,6 +17,15 @@ int main(void)
     _printf("Pointer: %p\n", (void *)&a); /* Should print the address of a */
     _printf("Unknown: %r\n"); /* Should print "%r" */
 
+    /* Test cases for flag characters */
+    _printf("Plus flag with positive integer: %+d\n", 12345);
+    _printf("Plus flag with negative integer: %+d\n", -12345);
+    _printf("Space flag with positive integer: % d\n", 12345);
+    _printf("Space flag with negative integer: % d\n", -12345);
+    _printf("Hash flag with octal: %#o\n", 12345);
+    _printf("Hash flag with hex (lowercase): %#x\n", 12345);
+    _printf("Hash flag with hex (uppercase): %#X\n", 12345);
+
     return (0);
 }
 
